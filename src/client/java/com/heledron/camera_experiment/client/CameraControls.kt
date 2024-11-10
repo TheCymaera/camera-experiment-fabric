@@ -27,22 +27,18 @@ val UNFIXED_CAMERA_CONTROLS: CameraControls = { player, moveVertical, moveHorizo
     player.setCameraOrientation(orientation)
 }
 
+var isAdjustingPivot = false
+
 val PIVOTED_CAMERA_CONTROLS: CameraControls = Controls@{ player, moveVertical, moveHorizontal ->
     val orientation = player.getCameraOrientation()
     val pivot = player.getCameraPivot()
 
 
-    if (player.isShiftKeyDown) {
+    isAdjustingPivot = player.isShiftKeyDown
+    if (isAdjustingPivot) {
         orientation.rotateZ(-moveVertical -moveHorizontal)
         player.setCameraPivot(orientation)
         player.setCameraOrientation(orientation)
-
-        // draw pivot axis
-        // TODO: Replace this with a proper graphics when I figure out rendering
-        val pivotAxis = Vec3(pivot.transform(Vector3f(0f,2f,0f)))
-        val middle = player.eyePosition.add(player.forward.scale(5.0))
-        val start = middle.subtract(pivotAxis.scale(.5))
-        ParticleRenderer.drawLine(player.level(), start,pivotAxis)
 
         return@Controls
     }

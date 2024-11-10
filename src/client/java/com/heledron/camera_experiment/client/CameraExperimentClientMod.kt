@@ -2,11 +2,18 @@
 
 package com.heledron.camera_experiment.client
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat
+import com.mojang.blaze3d.vertex.VertexFormat
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.RenderStateShard
+import net.minecraft.client.renderer.RenderType
 import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionHand
+import net.minecraft.world.phys.Vec3
+import org.joml.Vector3f
 
 
 class CameraExperimentClientMod : ClientModInitializer {
@@ -58,62 +65,52 @@ class CameraExperimentClientMod : ClientModInitializer {
             }
         }
 
-//        HudRenderCallback.EVENT.register { context, _->
-//            val tessellator = Tesselator.getInstance()
-//            val buffer = tessellator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR)
-//
-//            val matrix = context.pose().last().pose()
-//            buffer.addVertex(matrix, 20f, 20f, 5f).setColor(255,   0,   0, 255)
-//            buffer.addVertex(matrix,  5f, 40f, 5f).setColor(  0, 255,   0, 255)
-//            buffer.addVertex(matrix, 35f, 40f, 5f).setColor(  0,   0, 255, 255)
-//            buffer.addVertex(matrix, 20f, 60f, 5f).setColor(255, 255,   0, 255)
-//
-//            RenderSystem.setShader(CoreShaders.POSITION_COLOR)
-//            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F)
-//
-//            val mesh = buffer.build() ?: return@register
-//            BufferUploader.drawWithShader(mesh)
-//        }
+        // Render camera pivot plane when adjusting pivot
+        val renderType = RenderType.create(
+            "camera_pivot_plane",
+            DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.QUADS,
+            1536,
+            false,
+            true,
+            RenderType.CompositeState.builder()
+                .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
+                .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                .setDepthTestState(RenderStateShard.NO_DEPTH_TEST)
+                .setCullState(RenderStateShard.NO_CULL)
+                .createCompositeState(false)
+        )
 
+        WorldRenderEvents.AFTER_ENTITIES.register { context ->
+            if (!isAdjustingPivot) return@register
 
-//        WorldRenderEvents.END.register { context ->
-//            val x = 0f//player.x.toFloat()
-//            val y = -1f//player.y.toFloat()// - yOffset
-//            val z = 0f//player.z.toFloat()
-//            val size = .5f
-//
-//
-////            val camera = context.camera()
-//
-////            val viewMatrix = Matrix4f().lookAt(
-////                camera.position.toVector3f(),
-////                camera.position.toVector3f().add(camera.lookVector),
-////                camera.upVector,
-////            )
-//
-//            val matrix = Matrix4f()
-//                .mul(context.positionMatrix())
-////                .mul(viewMatrix)
-//                .mul(context.projectionMatrix())
-//
-//            val tessellator = RenderSystem.renderThreadTesselator()
-//            val buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR)
-//            buffer.addVertex(matrix, x - size, y, z - size).setColor(255, 0, 0, 255)
-//            buffer.addVertex(matrix, x + size, y, z - size).setColor(0, 255, 0, 255)
-//            buffer.addVertex(matrix, x + size, y, z + size).setColor(0, 0, 255, 255)
-//            buffer.addVertex(matrix, x - size, y, z + size).setColor(255, 255, 0, 255)
-//            val mesh = buffer.build() ?: return@register
-//
-//            // set up render state
-//            RenderSystem.enableDepthTest()
-//            RenderSystem.setShader(CoreShaders.POSITION_COLOR)
-//            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F)
-//            RenderSystem.depthFunc(GL11.GL_ALWAYS)
-//
-//            RenderSystem.depthFunc(GL11.GL_LEQUAL)
-//
-//            BufferUploader.drawWithShader(mesh)
-//        }
+            val camera = context.camera()
+            val player = Minecraft.getInstance().player ?: return@register
+            val delta = context.tickCounter()
+
+            val position = player.getEyePosition(delta.getGameTimeDeltaPartialTick(true))
+            val rotation = player.getCameraPivot()
+            val rectCenter = position.subtract(camera.position).toVector3f()
+
+            // color
+            val r = 0
+            val g = 204
+            val b = 204
+            val a = 50
+
+            // rect corners
+            val size = 2f
+            val r1 = rotation.transform(Vector3f(-size, -player.eyeHeight, -size)).add(rectCenter)
+            val r2 = rotation.transform(Vector3f( size, -player.eyeHeight, -size)).add(rectCenter)
+            val r3 = rotation.transform(Vector3f( size, -player.eyeHeight,  size)).add(rectCenter)
+            val r4 = rotation.transform(Vector3f(-size, -player.eyeHeight,  size)).add(rectCenter)
+
+            val buffer = context.consumers()?.getBuffer(renderType) ?: return@register
+            buffer.addVertex(r1.x, r1.y, r1.z).setColor(r, g, b, a)
+            buffer.addVertex(r2.x, r2.y, r2.z).setColor(r, g, b, a)
+            buffer.addVertex(r3.x, r3.y, r3.z).setColor(r, g, b, a)
+            buffer.addVertex(r4.x, r4.y, r4.z).setColor(r, g, b, a)
+        }
     }
 }
 
