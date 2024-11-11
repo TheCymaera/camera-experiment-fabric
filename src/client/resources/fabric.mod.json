@@ -7,18 +7,14 @@
   "authors": [],
   "contact": {},
   "license": "All-Rights-Reserved",
-  "icon": "assets/fabrichotswapping/icon.png",
+  "icon": "assets/camera_experiment/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
       "com.heledron.camera_experiment.client.CameraExperimentClientMod"
-    ],
-    "main": [
-      "com.heledron.camera_experiment.CameraExperimentMod"
     ]
   },
   "mixins": [
-    "camera_experiment.mixins.json",
     {
       "config": "camera_experiment.client.mixins.json",
       "environment": "client"
