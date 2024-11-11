@@ -1,7 +1,5 @@
 package com.heledron.camera_experiment.client
 
-import com.heledron.camera_experiment.client.utilities.toDegrees
-import com.heledron.camera_experiment.client.utilities.toRadians
 import net.minecraft.world.entity.player.Player
 import org.joml.Quaternionf
 import org.joml.Vector3f

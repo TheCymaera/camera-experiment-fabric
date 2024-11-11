@@ -6,9 +6,9 @@ import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-import static com.heledron.camera_experiment.client.CameraOrientationKt.getCameraZRot;
-import static com.heledron.camera_experiment.client.utilities.MiscKt.castEntityAsClientPlayer;
-import static com.heledron.camera_experiment.client.utilities.MathsKt.toRadians;
+import static com.heledron.camera_experiment.client.CameraFieldsKt.getCameraZRot;
+import static com.heledron.camera_experiment.client.UtilitiesKt.castEntityAsClientPlayer;
+import static com.heledron.camera_experiment.client.UtilitiesKt.toRadians;
 
 
 @Mixin(Camera.class)
@@ -17,12 +17,12 @@ public abstract class CameraMixin  {
 
     @ModifyArg(
             method = "setRotation",
+            index = 2,
             at = @At(
                     value = "INVOKE",
                     target = "Lorg/joml/Quaternionf;rotationYXZ(FFF)Lorg/joml/Quaternionf;",
                     remap = false
-            ),
-            index = 2
+            )
     )
     private float setRoll(float original) {
         var player = castEntityAsClientPlayer(this.entity);

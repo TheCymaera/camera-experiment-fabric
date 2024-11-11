@@ -1,4 +1,4 @@
-package com.heledron.camera_experiment.client.utilities
+package com.heledron.camera_experiment.client
 
 import net.minecraft.client.Minecraft
 import net.minecraft.client.player.LocalPlayer
@@ -13,4 +13,12 @@ fun castEntityAsClientPlayer(entity: Entity): LocalPlayer? {
 fun <T>uncheckedCast(entity: Any): T {
     @Suppress("UNCHECKED_CAST")
     return entity as T
+}
+
+fun toDegrees(float: Float): Float {
+    return Math.toDegrees(float.toDouble()).toFloat()
+}
+
+fun toRadians(float: Float): Float {
+    return Math.toRadians(float.toDouble()).toFloat()
 }

@@ -1,8 +1,8 @@
 package com.heledron.camera_experiment.mixin.client;
 
+import com.heledron.camera_experiment.client.UtilitiesKt;
 import net.minecraft.Util;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
@@ -13,28 +13,20 @@ import static com.heledron.camera_experiment.client.CameraControlsKt.getSelected
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow abstract public void setXRot(float xRot);
-    @Shadow abstract public void setYRot(float yRot);
     @Shadow private Entity vehicle;
     @Shadow private float xRot;
     @Shadow private float yRot;
-    @Shadow public float xRotO;
-    @Shadow public float yRotO;
-
-    @Shadow public abstract Vec3 getForward();
-
-    @Shadow public abstract float distanceTo(Entity entity);
-
-    @Shadow public abstract void onRemoval(Entity.RemovalReason removalReason);
+    @Shadow private float xRotO;
+    @Shadow private float yRotO;
 
     @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
-    public void turn(double horizontalMove, double verticalMove, CallbackInfo ci) {
+    private void turn(double horizontalMove, double verticalMove, CallbackInfo ci) {
         // ignore if no selected camera controls
         var selectedCameraControls = getSelectedCameraControls();
         if (selectedCameraControls == null) return;
 
         // ignore if not client player
-        var player = com.heledron.camera_experiment.client.utilities.MiscKt.castEntityAsClientPlayer(com.heledron.camera_experiment.client.utilities.MiscKt.uncheckedCast(this));
+        var player = UtilitiesKt.castEntityAsClientPlayer(UtilitiesKt.uncheckedCast(this));
         if (player == null) return;
 
         // track old values

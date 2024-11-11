@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.RenderStateShard
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.network.chat.Component
 import net.minecraft.world.InteractionHand
-import net.minecraft.world.phys.Vec3
 import org.joml.Vector3f
 
 
@@ -31,13 +30,13 @@ class CameraExperimentClientMod : ClientModInitializer {
             if (level != minecraft.level) return@register
             val player = minecraft.player ?: return@register
 
-            // Throttle
+            // throttle
             if (cooldown > 0) {
                 cooldown--
                 return@register
             }
 
-            // On right click, toggle camera override
+            // on right click, toggle camera controls
             if (minecraft.options.keyUse.isDown) {
                 cooldown = 10
 
@@ -70,9 +69,9 @@ class CameraExperimentClientMod : ClientModInitializer {
             "camera_pivot_plane",
             DefaultVertexFormat.POSITION_COLOR,
             VertexFormat.Mode.QUADS,
-            1536,
-            false,
-            true,
+            1536, // expectedBufferSize
+            false, // hasCrumbling
+            true, // translucent
             RenderType.CompositeState.builder()
                 .setShaderState(RenderStateShard.POSITION_COLOR_SHADER)
                 .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
